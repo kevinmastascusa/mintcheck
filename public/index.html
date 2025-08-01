@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSA Card PreGrader - Pokémon Cards</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-certificate"></i>
+                    <h1>PSA Card PreGrader</h1>
+                </div>
+                <p class="subtitle">Professional Pokémon Card Analysis & Grade Estimation</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Upload Section -->
+            <section class="upload-section" id="uploadSection">
+                <div class="upload-container">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <h3>Upload Your Pokémon Card</h3>
+                        <p>Drag and drop your card image here or click to browse</p>
+                        <p class="upload-hint">Supports JPG, PNG, WEBP (Max 10MB)</p>
+                        <input type="file" id="fileInput" accept="image/*" hidden>
+                        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                            Choose File
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analysis Section -->
+            <section class="analysis-section" id="analysisSection" style="display: none;">
+                <div class="analysis-container">
+                    <div class="analysis-header">
+                        <h2><i class="fas fa-microscope"></i> Card Analysis</h2>
+                        <div class="loading-spinner" id="loadingSpinner">
+                            <div class="spinner"></div>
+                            <p>Analyzing your card...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="analysis-content" id="analysisContent" style="display: none;">
+                        <!-- Results will be populated here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <div class="results-container">
+                    <div class="grade-display">
+                        <div class="grade-circle" id="gradeCircle">
+                            <span class="grade-number" id="gradeNumber">--</span>
+                            <span class="grade-label" id="gradeLabel">Grade</span>
+                        </div>
+                        <div class="grade-details">
+                            <h3 id="gradeTitle">Estimated Grade</h3>
+                            <p id="gradeDescription">Analysis in progress...</p>
+                        </div>
+                    </div>
+
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <i class="fas fa-crosshairs"></i>
+                                <h4>Centering</h4>
+                            </div>
+                            <div class="metric-score" id="centeringScore">--</div>
+                            <div class="metric-grade" id="centeringGrade">--</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <i class="fas fa-square"></i>
+                                <h4>Corners</h4>
+                            </div>
+                            <div class="metric-score" id="cornersScore">--</div>
+                            <div class="metric-grade" id="cornersGrade">--</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <i class="fas fa-border-all"></i>
+                                <h4>Edges</h4>
+                            </div>
+                            <div class="metric-score" id="edgesScore">--</div>
+                            <div class="metric-grade" id="edgesGrade">--</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <i class="fas fa-eye"></i>
+                                <h4>Surface</h4>
+                            </div>
+                            <div class="metric-score" id="surfaceScore">--</div>
+                            <div class="metric-grade" id="surfaceGrade">--</div>
+                        </div>
+                    </div>
+
+                    <div class="probability-section">
+                        <h3><i class="fas fa-chart-line"></i> Grade Probability</h3>
+                        <div class="probability-bar">
+                            <div class="probability-fill" id="probabilityFill"></div>
+                            <span class="probability-text" id="probabilityText">--%</span>
+                        </div>
+                    </div>
+
+                    <div class="recommendations-section">
+                        <h3><i class="fas fa-lightbulb"></i> Recommendations</h3>
+                        <div class="recommendations-list" id="recommendationsList">
+                            <!-- Recommendations will be populated here -->
+                        </div>
+                    </div>
+
+                    <div class="market-value-section">
+                        <h3><i class="fas fa-dollar-sign"></i> Estimated Market Value</h3>
+                        <div class="market-value" id="marketValue">$--</div>
+                        <p class="market-note">*Estimated value based on condition and rarity</p>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="analyzeNewCard()">
+                            <i class="fas fa-plus"></i> Analyze Another Card
+                        </button>
+                        <button class="btn btn-secondary" onclick="downloadReport()">
+                            <i class="fas fa-download"></i> Download Report
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 PSA Card PreGrader. Professional card analysis tool.</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
