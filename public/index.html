@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PSA Card PreGrader - Pokémon Cards</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>PSA Card PreGrader - Professional Pokémon Card Analysis</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
@@ -14,174 +14,334 @@
         <header class="header">
             <div class="header-content">
                 <div class="logo">
-                    <i class="fas fa-certificate"></i>
+                    <i class="fas fa-gem"></i>
                     <h1>PSA Card PreGrader</h1>
                 </div>
-                <p class="subtitle">Professional Pokémon Card Analysis & Grade Estimation</p>
+                <p class="tagline">Professional Pokémon Card Analysis & Grading Estimation</p>
             </div>
         </header>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Upload Section -->
-            <section class="upload-section" id="uploadSection">
-                <div class="upload-container">
-                            <div class="upload-area" id="uploadArea">
-            <div class="upload-icon">
-                <i class="fas fa-cloud-upload-alt"></i>
-            </div>
-            <h3>Upload Your Pokémon Card</h3>
-            <p>For best analysis results, please upload both front and back images</p>
-            <p class="upload-hint">Supports JPG, PNG, WEBP (Max 10MB each)</p>
-            <div class="upload-instructions">
-                <div class="instruction-step">
-                    <span class="step-number">1</span>
-                    <span>Upload front image (required)</span>
+        <!-- Upload Section -->
+        <section class="upload-section" id="uploadSection">
+            <div class="upload-container">
+                <div class="upload-header">
+                    <h2><i class="fas fa-upload"></i> Upload Your Pokémon Cards</h2>
+                    <p>Get professional-grade analysis with our state-of-the-art computational photography pipeline</p>
                 </div>
-                <div class="instruction-step">
-                    <span class="step-number">2</span>
-                    <span>Upload back image (recommended)</span>
-                </div>
-                <div class="instruction-step">
-                    <span class="step-number">3</span>
-                    <span>Get comprehensive analysis</span>
-                </div>
-            </div>
-            <input type="file" id="fileInput" accept="image/*" multiple hidden>
-            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-                Choose Files
-            </button>
-        </div>
-                </div>
-            </section>
 
-            <!-- Analysis Section -->
-            <section class="analysis-section" id="analysisSection" style="display: none;">
-                <div class="analysis-container">
-                    <div class="analysis-header">
-                        <h2><i class="fas fa-microscope"></i> Card Analysis</h2>
-                        <div class="loading-spinner" id="loadingSpinner">
-                            <div class="spinner"></div>
-                            <p>Analyzing your card...</p>
+                <!-- Upload Instructions -->
+                <div class="upload-instructions">
+                    <div class="instruction-card">
+                        <div class="instruction-icon">
+                            <i class="fas fa-camera"></i>
                         </div>
+                        <h3>Step 1: Upload Front Image</h3>
+                        <p>Take a clear, well-lit photo of the front of your card. Ensure the entire card is visible and in focus.</p>
                     </div>
                     
-                    <div class="analysis-content" id="analysisContent" style="display: none;">
-                        <!-- Results will be populated here -->
+                    <div class="instruction-card">
+                        <div class="instruction-icon">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <h3>Step 2: Upload Back Image</h3>
+                        <p>Take a clear photo of the back of your card. This helps us analyze edge wear and surface condition.</p>
+                    </div>
+                    
+                    <div class="instruction-card">
+                        <div class="instruction-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>Step 3: Get Analysis</h3>
+                        <p>Receive comprehensive analysis including grade estimation, defect detection, and market value.</p>
                     </div>
                 </div>
-            </section>
 
-            <!-- Results Section -->
-            <section class="results-section" id="resultsSection" style="display: none;">
-                <div class="results-container">
-                    <div class="grade-display">
-                        <div class="grade-circle" id="gradeCircle">
-                            <span class="grade-number" id="gradeNumber">--</span>
-                            <span class="grade-label" id="gradeLabel">Grade</span>
+                <!-- Image Upload Areas -->
+                <div class="image-upload-areas">
+                    <div class="upload-area" id="frontUploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-camera"></i>
                         </div>
-                        <div class="grade-details">
-                            <h3 id="gradeTitle">Estimated Grade</h3>
-                            <p id="gradeDescription">Analysis in progress...</p>
+                        <h3>Front Image</h3>
+                        <p>Upload the front of your card</p>
+                        <div class="upload-status" id="frontStatus">
+                            <span class="status-text">No image selected</span>
                         </div>
-                    </div>
-
-                    <div class="metrics-grid">
-                        <div class="metric-card">
-                            <div class="metric-header">
-                                <i class="fas fa-crosshairs"></i>
-                                <h4>Centering</h4>
-                            </div>
-                            <div class="metric-score" id="centeringScore">--</div>
-                            <div class="metric-grade" id="centeringGrade">--</div>
-                        </div>
-
-                        <div class="metric-card">
-                            <div class="metric-header">
-                                <i class="fas fa-square"></i>
-                                <h4>Corners</h4>
-                            </div>
-                            <div class="metric-score" id="cornersScore">--</div>
-                            <div class="metric-grade" id="cornersGrade">--</div>
-                        </div>
-
-                        <div class="metric-card">
-                            <div class="metric-header">
-                                <i class="fas fa-border-all"></i>
-                                <h4>Edges</h4>
-                            </div>
-                            <div class="metric-score" id="edgesScore">--</div>
-                            <div class="metric-grade" id="edgesGrade">--</div>
-                        </div>
-
-                        <div class="metric-card">
-                            <div class="metric-header">
-                                <i class="fas fa-eye"></i>
-                                <h4>Surface</h4>
-                            </div>
-                            <div class="metric-score" id="surfaceScore">--</div>
-                            <div class="metric-grade" id="surfaceGrade">--</div>
-                        </div>
-                    </div>
-
-                    <div class="probability-section">
-                        <h3><i class="fas fa-chart-line"></i> Grade Probability</h3>
-                        <div class="probability-bar">
-                            <div class="probability-fill" id="probabilityFill"></div>
-                            <span class="probability-text" id="probabilityText">--%</span>
-                        </div>
-                    </div>
-
-                    <div class="recommendations-section">
-                        <h3><i class="fas fa-lightbulb"></i> Recommendations</h3>
-                        <div class="recommendations-list" id="recommendationsList">
-                            <!-- Recommendations will be populated here -->
-                        </div>
-                    </div>
-                    
-                    <div class="defect-section">
-                        <h3><i class="fas fa-exclamation-triangle"></i> Defect Detection</h3>
-                        <div class="defect-content" id="defectSection">
-                            <!-- Defect detection results will be populated here -->
-                        </div>
-                    </div>
-                    
-                    <div class="photo-section">
-                        <h3><i class="fas fa-camera"></i> Computational Photography</h3>
-                        <div class="photo-content" id="photoSection">
-                            <!-- Computational photography analysis will be populated here -->
-                        </div>
-                    </div>
-                    
-                    <div class="segmentation-section">
-                        <h3><i class="fas fa-crop-alt"></i> Image Segmentation</h3>
-                        <div class="segmentation-content" id="segmentationSection">
-                            <!-- Image segmentation and highlights will be populated here -->
-                        </div>
-                    </div>
-
-                    <div class="market-value-section">
-                        <h3><i class="fas fa-dollar-sign"></i> Estimated Market Value</h3>
-                        <div class="market-value" id="marketValue">$--</div>
-                        <p class="market-note">*Estimated value based on condition and rarity</p>
-                    </div>
-
-                    <div class="action-buttons">
-                        <button class="btn btn-primary" onclick="analyzeNewCard()">
-                            <i class="fas fa-plus"></i> Analyze Another Card
+                        <input type="file" id="frontImageInput" accept="image/*" hidden>
+                        <button class="upload-btn" onclick="document.getElementById('frontImageInput').click()">
+                            <i class="fas fa-plus"></i> Choose Front Image
                         </button>
-                        <button class="btn btn-secondary" onclick="downloadReport()">
-                            <i class="fas fa-download"></i> Download Report
+                    </div>
+
+                    <div class="upload-area" id="backUploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <h3>Back Image</h3>
+                        <p>Upload the back of your card (recommended)</p>
+                        <div class="upload-status" id="backStatus">
+                            <span class="status-text">No image selected</span>
+                        </div>
+                        <input type="file" id="backImageInput" accept="image/*" hidden>
+                        <button class="upload-btn" onclick="document.getElementById('backImageInput').click()">
+                            <i class="fas fa-plus"></i> Choose Back Image
                         </button>
                     </div>
                 </div>
-            </section>
-        </main>
 
-        <!-- Footer -->
-        <footer class="footer">
-            <p>&copy; 2024 PSA Card PreGrader. Professional card analysis tool.</p>
-        </footer>
+                <!-- Image Previews -->
+                <div class="image-previews" id="imagePreviews" style="display: none;">
+                    <div class="preview-container">
+                        <h3>Image Previews</h3>
+                        <div class="preview-grid">
+                            <div class="preview-item" id="frontPreview">
+                                <h4>Front Image</h4>
+                                <div class="preview-placeholder">
+                                    <i class="fas fa-camera"></i>
+                                    <p>No front image selected</p>
+                                </div>
+                            </div>
+                            <div class="preview-item" id="backPreview">
+                                <h4>Back Image</h4>
+                                <div class="preview-placeholder">
+                                    <i class="fas fa-image"></i>
+                                    <p>No back image selected</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="preview-actions">
+                            <button class="analyze-btn" id="analyzeBtn" disabled>
+                                <i class="fas fa-play"></i> Start Analysis
+                            </button>
+                            <button class="reset-btn" onclick="resetUploads()">
+                                <i class="fas fa-redo"></i> Reset Images
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analysis Section -->
+        <section class="analysis-section" id="analysisSection" style="display: none;">
+            <div class="analysis-container">
+                <!-- Particle Effects -->
+                <div class="particles">
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                </div>
+                
+                <!-- Scan Line Effect -->
+                <div class="scan-line"></div>
+                
+                <!-- Data Stream Effect -->
+                <div class="data-stream"></div>
+                
+                <!-- Matrix Rain Effect -->
+                <div class="matrix-rain">
+                    <div class="matrix-column">01 10 11 00 01 10 11 00 01 10 11 00 01 10 11 00 01 10 11 00</div>
+                    <div class="matrix-column">10 01 00 11 10 01 00 11 10 01 00 11 10 01 00 11 10 01 00 11</div>
+                    <div class="matrix-column">11 00 01 10 11 00 01 10 11 00 01 10 11 00 01 10 11 00 01 10</div>
+                    <div class="matrix-column">00 11 10 01 00 11 10 01 00 11 10 01 00 11 10 01 00 11 10 01</div>
+                    <div class="matrix-column">01 10 11 00 01 10 11 00 01 10 11 00 01 10 11 00 01 10 11 00</div>
+                    <div class="matrix-column">10 01 00 11 10 01 00 11 10 01 00 11 10 01 00 11 10 01 00 11</div>
+                    <div class="matrix-column">11 00 01 10 11 00 01 10 11 00 01 10 11 00 01 10 11 00 01 10</div>
+                    <div class="matrix-column">00 11 10 01 00 11 10 01 00 11 10 01 00 11 10 01 00 11 10 01</div>
+                    <div class="matrix-column">01 10 11 00 01 10 11 00 01 10 11 00 01 10 11 00 01 10 11 00</div>
+                    <div class="matrix-column">10 01 00 11 10 01 00 11 10 01 00 11 10 01 00 11 10 01 00 11</div>
+                </div>
+                
+                <!-- Neural Network Visualization -->
+                <div class="neural-network">
+                    <div class="neural-node" style="top: 20%; left: 20%;"></div>
+                    <div class="neural-node" style="top: 20%; left: 80%;"></div>
+                    <div class="neural-node" style="top: 50%; left: 10%;"></div>
+                    <div class="neural-node" style="top: 50%; left: 90%;"></div>
+                    <div class="neural-node" style="top: 80%; left: 20%;"></div>
+                    <div class="neural-node" style="top: 80%; left: 80%;"></div>
+                    <div class="neural-node" style="top: 35%; left: 50%;"></div>
+                    <div class="neural-node" style="top: 65%; left: 50%;"></div>
+                </div>
+                
+                <!-- DNA Helix Effect -->
+                <div class="dna-helix">
+                    <div class="dna-strand"></div>
+                    <div class="dna-strand"></div>
+                </div>
+                
+                <!-- Quantum Loader -->
+                <div class="quantum-loader">
+                    <div class="quantum-particle"></div>
+                    <div class="quantum-particle"></div>
+                    <div class="quantum-particle"></div>
+                    <div class="quantum-particle"></div>
+                </div>
+                
+                <div class="loading-spinner" id="loadingSpinner">
+                    <div class="spinner"></div>
+                    <h3 class="holographic-text">QUANTUM ANALYSIS IN PROGRESS</h3>
+                    <p class="loading-subtext">Neural networks processing card data...</p>
+                    
+                    <!-- Analysis Steps -->
+                    <div class="analysis-steps">
+                        <div class="analysis-step" id="step1">
+                            <div class="step-icon"><i class="fas fa-microchip"></i></div>
+                            <div class="step-text">Image Processing</div>
+                        </div>
+                        <div class="analysis-step" id="step2">
+                            <div class="step-icon"><i class="fas fa-brain"></i></div>
+                            <div class="step-text">AI Analysis</div>
+                        </div>
+                        <div class="analysis-step" id="step3">
+                            <div class="step-icon"><i class="fas fa-chart-line"></i></div>
+                            <div class="step-text">Grading Algorithm</div>
+                        </div>
+                        <div class="analysis-step" id="step4">
+                            <div class="step-icon"><i class="fas fa-gem"></i></div>
+                            <div class="step-text">Results Generation</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Analysis Status -->
+                    <div class="analysis-status">
+                        <div class="status-item">
+                            <div class="status-indicator processing" id="status1"></div>
+                            <span>Computational Photography</span>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-indicator" id="status2"></div>
+                            <span>Defect Detection</span>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-indicator" id="status3"></div>
+                            <span>Image Segmentation</span>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-indicator" id="status4"></div>
+                            <span>PSA Grading</span>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+                <div class="analysis-content" id="analysisContent" style="display: none;">
+                    <!-- Analysis content will be populated here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section class="results-section" id="resultsSection" style="display: none;">
+            <div class="results-container">
+                <!-- Grade Display -->
+                <div class="grade-display">
+                    <div class="grade-circle">
+                        <div class="grade-number" id="gradeNumber">--</div>
+                        <div class="grade-label" id="gradeLabel">Grade</div>
+                    </div>
+                    <div class="grade-info">
+                        <h2 id="gradeTitle">Grade Title</h2>
+                        <p id="gradeDescription">Grade description will appear here</p>
+                    </div>
+                </div>
+
+                <!-- Card Images Display -->
+                <div class="card-images-display">
+                    <h3><i class="fas fa-images"></i> Card Images</h3>
+                    <div class="card-images-grid">
+                        <div class="card-image-container" id="frontCardDisplay">
+                            <h4>Front Image</h4>
+                            <div class="card-image-placeholder">
+                                <i class="fas fa-camera"></i>
+                                <p>Front image will appear here</p>
+                            </div>
+                        </div>
+                        <div class="card-image-container" id="backCardDisplay">
+                            <h4>Back Image</h4>
+                            <div class="card-image-placeholder">
+                                <i class="fas fa-image"></i>
+                                <p>Back image will appear here</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metrics -->
+                <div class="metrics-section">
+                    <h3><i class="fas fa-chart-bar"></i> Detailed Metrics</h3>
+                    <div class="metrics-grid" id="metricsGrid">
+                        <!-- Metrics will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Probability -->
+                <div class="probability-section">
+                    <h3><i class="fas fa-percentage"></i> Grade Probability</h3>
+                    <div class="probability-chart" id="probabilityChart">
+                        <!-- Probability chart will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Recommendations -->
+                <div class="recommendations-section">
+                    <h3><i class="fas fa-lightbulb"></i> Recommendations</h3>
+                    <div class="recommendations-list" id="recommendationsList">
+                        <!-- Recommendations will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Defect Detection -->
+                <div class="defect-section">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Defect Detection</h3>
+                    <div class="defect-content" id="defectSection">
+                        <!-- Defect detection results will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Computational Photography -->
+                <div class="photo-section">
+                    <h3><i class="fas fa-camera"></i> Computational Photography</h3>
+                    <div class="photo-content" id="photoSection">
+                        <!-- Computational photography analysis will be populated here -->
+                    </div>
+                </div>
+                
+                <!-- Image Segmentation -->
+                <div class="segmentation-section">
+                    <h3><i class="fas fa-crop-alt"></i> Image Segmentation</h3>
+                    <div class="segmentation-content" id="segmentationSection">
+                        <!-- Image segmentation and highlights will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Market Value -->
+                <div class="market-value-section">
+                    <h3><i class="fas fa-dollar-sign"></i> Estimated Market Value</h3>
+                    <div class="market-value-content" id="marketValueSection">
+                        <!-- Market value will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="action-btn primary" onclick="analyzeNewCard()">
+                        <i class="fas fa-plus"></i> Analyze Another Card
+                    </button>
+                    <button class="action-btn secondary" onclick="downloadReport()">
+                        <i class="fas fa-download"></i> Download Report
+                    </button>
+                </div>
+            </div>
+        </section>
     </div>
 
     <script src="script.js"></script>

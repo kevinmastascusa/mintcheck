@@ -2,145 +2,252 @@
 let currentAnalysis = null;
 let currentGrading = null;
 let currentCardImage = null;
+let frontImage = null;
+let backImage = null;
 
 // DOM elements
-const uploadArea = document.getElementById('uploadArea');
-const fileInput = document.getElementById('fileInput');
 const uploadSection = document.getElementById('uploadSection');
 const analysisSection = document.getElementById('analysisSection');
 const resultsSection = document.getElementById('resultsSection');
 const loadingSpinner = document.getElementById('loadingSpinner');
 const analysisContent = document.getElementById('analysisContent');
+const imagePreviews = document.getElementById('imagePreviews');
+const analyzeBtn = document.getElementById('analyzeBtn');
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
-    initializeUploadArea();
-    initializeFileInput();
+    initializeUploadAreas();
+    initializeFileInputs();
+    
+    // Add click event listener to analyze button
+    analyzeBtn.addEventListener('click', startAnalysis);
 });
 
-// Initialize drag and drop functionality
-function initializeUploadArea() {
-    uploadArea.addEventListener('dragover', handleDragOver);
-    uploadArea.addEventListener('dragleave', handleDragLeave);
-    uploadArea.addEventListener('drop', handleDrop);
-    uploadArea.addEventListener('click', () => fileInput.click());
+// Initialize upload areas
+function initializeUploadAreas() {
+    const frontUploadArea = document.getElementById('frontUploadArea');
+    const backUploadArea = document.getElementById('backUploadArea');
+
+    // Front upload area drag and drop
+    frontUploadArea.addEventListener('dragover', handleDragOver);
+    frontUploadArea.addEventListener('dragleave', handleDragLeave);
+    frontUploadArea.addEventListener('drop', (e) => handleDrop(e, 'front'));
+
+    // Back upload area drag and drop
+    backUploadArea.addEventListener('dragover', handleDragOver);
+    backUploadArea.addEventListener('dragleave', handleDragLeave);
+    backUploadArea.addEventListener('drop', (e) => handleDrop(e, 'back'));
 }
 
-// Initialize file input
-function initializeFileInput() {
-    fileInput.addEventListener('change', handleFileSelect);
+// Initialize file inputs
+function initializeFileInputs() {
+    const frontImageInput = document.getElementById('frontImageInput');
+    const backImageInput = document.getElementById('backImageInput');
+
+    frontImageInput.addEventListener('change', (e) => handleFileSelect(e, 'front'));
+    backImageInput.addEventListener('change', (e) => handleFileSelect(e, 'back'));
 }
 
-// Drag and drop handlers
+// Handle drag over
 function handleDragOver(e) {
     e.preventDefault();
-    uploadArea.classList.add('dragover');
+    e.currentTarget.classList.add('dragover');
 }
 
+// Handle drag leave
 function handleDragLeave(e) {
     e.preventDefault();
-    uploadArea.classList.remove('dragover');
+    e.currentTarget.classList.remove('dragover');
 }
 
-function handleDrop(e) {
+// Handle drop
+function handleDrop(e, type) {
     e.preventDefault();
-    uploadArea.classList.remove('dragover');
+    e.currentTarget.classList.remove('dragover');
     
     const files = e.dataTransfer.files;
     if (files.length > 0) {
-        handleFile(files[0]);
+        handleFile(files[0], type);
     }
 }
 
-function handleFileSelect(e) {
-    const files = Array.from(e.target.files);
+// Handle file selection
+function handleFileSelect(e, type) {
+    const files = e.target.files;
     if (files.length > 0) {
-        if (files.length === 1) {
-            handleFile(files[0]);
-        } else {
-            handleMultipleFiles(files);
-        }
+        handleFile(files[0], type);
     }
 }
 
 // Handle file upload
-function handleFile(file) {
-    // Validate file type
+function handleFile(file, type) {
     if (!file.type.startsWith('image/')) {
-        showError('Please select a valid image file.');
+        showError('Please select an image file.');
         return;
     }
-    
-    // Validate file size (10MB limit)
+
     if (file.size > 10 * 1024 * 1024) {
         showError('File size must be less than 10MB.');
         return;
     }
-    
-    // Show preview and start analysis
-    showFilePreview(file);
-    startAnalysis(file);
-}
 
-// Handle multiple files
-function handleMultipleFiles(files) {
-    if (files.length === 0) return;
-    
-    // For now, analyze the first file (front image)
-    const frontImage = files[0];
-    handleFile(frontImage);
-    
-    if (files.length > 1) {
-        // Show message about back image being available
-        setTimeout(() => {
-            showSuccess('Front image uploaded! Back image analysis will be added in future updates.');
-        }, 1000);
-    }
-}
-
-// Show file preview
-function showFilePreview(file) {
     const reader = new FileReader();
     reader.onload = function(e) {
-        uploadArea.innerHTML = `
-            <div class="upload-preview">
-                <img src="${e.target.result}" alt="Card preview" style="max-width: 200px; max-height: 200px; border-radius: 10px;">
-                <p>${file.name}</p>
-            </div>
-        `;
-        currentCardImage = e.target.result; // Store the current card image
+        if (type === 'front') {
+            frontImage = file;
+            updateUploadStatus('front', file.name);
+            updatePreview('front', e.target.result);
+        } else if (type === 'back') {
+            backImage = file;
+            updateUploadStatus('back', file.name);
+            updatePreview('back', e.target.result);
+        }
+        
+        checkAnalysisReadiness();
     };
     reader.readAsDataURL(file);
 }
 
-// Start analysis process
-function startAnalysis(file) {
-    // Show analysis section
-    uploadSection.style.display = 'none';
-    analysisSection.style.display = 'block';
+// Update upload status
+function updateUploadStatus(type, fileName) {
+    const statusElement = document.getElementById(`${type}Status`);
+    const statusText = statusElement.querySelector('.status-text');
+    statusText.textContent = fileName;
+    statusElement.style.background = 'rgba(56, 161, 105, 0.2)';
+    statusText.style.color = '#38a169';
+}
+
+// Update preview
+function updatePreview(type, imageData) {
+    const previewElement = document.getElementById(`${type}Preview`);
+    const placeholder = previewElement.querySelector('.preview-placeholder');
+    
+    placeholder.innerHTML = `<img src="${imageData}" alt="${type} preview" class="preview-image">`;
+    
+    // Show previews section
+    imagePreviews.style.display = 'block';
+}
+
+// Check if ready for analysis
+function checkAnalysisReadiness() {
+    if (frontImage) {
+        analyzeBtn.disabled = false;
+        analyzeBtn.textContent = 'Start Analysis';
+    } else {
+        analyzeBtn.disabled = true;
+        analyzeBtn.textContent = 'Upload Front Image First';
+    }
+}
+
+// Reset uploads
+function resetUploads() {
+    frontImage = null;
+    backImage = null;
+    
+    // Reset status
+    document.getElementById('frontStatus').querySelector('.status-text').textContent = 'No image selected';
+    document.getElementById('backStatus').querySelector('.status-text').textContent = 'No image selected';
+    document.getElementById('frontStatus').style.background = '';
+    document.getElementById('backStatus').style.background = '';
+    document.getElementById('frontStatus').querySelector('.status-text').style.color = '';
+    document.getElementById('backStatus').querySelector('.status-text').style.color = '';
+    
+    // Reset previews
+    document.getElementById('frontPreview').querySelector('.preview-placeholder').innerHTML = `
+        <i class="fas fa-camera"></i>
+        <p>No front image selected</p>
+    `;
+    document.getElementById('backPreview').querySelector('.preview-placeholder').innerHTML = `
+        <i class="fas fa-image"></i>
+        <p>No back image selected</p>
+    `;
+    
+    // Hide previews
+    imagePreviews.style.display = 'none';
+    
+    // Reset button
+    analyzeBtn.disabled = true;
+    analyzeBtn.textContent = 'Upload Front Image First';
+}
+
+// Start analysis with high-tech effects
+function startAnalysis() {
+    if (!frontImage) {
+        showError('Please upload a front image first.');
+        return;
+    }
+
+    // Add button animation
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    analyzeBtn.style.transform = 'scale(0.95)';
+    analyzeBtn.style.animation = 'pulse 0.5s ease-in-out';
+    
+    setTimeout(() => {
+        analyzeBtn.style.transform = 'scale(1)';
+        analyzeBtn.style.animation = '';
+    }, 500);
+
+    // Show analysis section with fade effect
+    uploadSection.style.opacity = '0';
+    uploadSection.style.transform = 'translateY(-20px)';
+    uploadSection.style.transition = 'all 0.5s ease-in-out';
+    
+    setTimeout(() => {
+        uploadSection.style.display = 'none';
+        analysisSection.style.display = 'block';
+        analysisSection.style.opacity = '0';
+        analysisSection.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            analysisSection.style.opacity = '1';
+            analysisSection.style.transform = 'translateY(0)';
+            analysisSection.style.transition = 'all 0.5s ease-in-out';
+        }, 100);
+    }, 500);
+    
     resultsSection.style.display = 'none';
     
-    // Show loading spinner
+    // Show loading spinner with holographic effect
     loadingSpinner.style.display = 'flex';
+    loadingSpinner.style.opacity = '0';
+    loadingSpinner.style.transform = 'scale(0.8)';
+    
+    setTimeout(() => {
+        loadingSpinner.style.opacity = '1';
+        loadingSpinner.style.transform = 'scale(1)';
+        loadingSpinner.style.transition = 'all 0.5s ease-in-out';
+    }, 600);
+    
     analysisContent.style.display = 'none';
     
     // Create FormData and send to server
     const formData = new FormData();
-    formData.append('cardImage', file);
+    formData.append('frontImage', frontImage);
+    if (backImage) {
+        formData.append('backImage', backImage);
+    }
+    
+    // Start high-tech progress simulation
+    setTimeout(() => {
+        simulateProgress();
+    }, 1000);
     
     fetch('/api/analyze', {
         method: 'POST',
         body: formData
     })
     .then(response => {
+        console.log('Response status:', response.status);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.json();
     })
     .then(data => {
+        console.log('Analysis data received:', data);
         currentAnalysis = data.analysis;
         currentGrading = data.grading;
+        currentCardImage = frontImage ? URL.createObjectURL(frontImage) : null;
         displayResults(data);
     })
     .catch(error => {
@@ -148,6 +255,128 @@ function startAnalysis(file) {
         showError('Failed to analyze card. Please try again.');
         resetUploadArea();
     });
+}
+
+// Simulate progress with high-tech animations
+function simulateProgress() {
+    const progressFill = document.getElementById('progressFill');
+    const steps = document.querySelectorAll('.analysis-step');
+    const statusIndicators = document.querySelectorAll('.status-indicator');
+    let progress = 0;
+    let currentStep = 0;
+    
+    // Reset all steps and indicators
+    steps.forEach(step => step.classList.remove('active'));
+    statusIndicators.forEach(indicator => {
+        indicator.classList.remove('processing', 'completed');
+    });
+    
+    // Start with first step active
+    steps[0].classList.add('active');
+    statusIndicators[0].classList.add('processing');
+    
+    // Make progress bar visible and animated
+    progressFill.style.width = '0%';
+    progressFill.style.transition = 'width 0.5s ease-in-out';
+    
+    const interval = setInterval(() => {
+        progress += Math.random() * 6 + 3; // More controlled progress
+        
+        if (progress > 100) {
+            progress = 100;
+        }
+        
+        // Update progress bar with smooth animation
+        progressFill.style.width = progress + '%';
+        
+        // Update steps based on progress with visual feedback
+        if (progress > 20 && currentStep === 0) {
+            // Complete step 1
+            steps[0].classList.remove('active');
+            steps[0].classList.add('completed');
+            statusIndicators[0].classList.remove('processing');
+            statusIndicators[0].classList.add('completed');
+            
+            // Start step 2
+            setTimeout(() => {
+                steps[1].classList.add('active');
+                statusIndicators[1].classList.add('processing');
+            }, 200);
+            currentStep = 1;
+        } else if (progress > 45 && currentStep === 1) {
+            // Complete step 2
+            steps[1].classList.remove('active');
+            steps[1].classList.add('completed');
+            statusIndicators[1].classList.remove('processing');
+            statusIndicators[1].classList.add('completed');
+            
+            // Start step 3
+            setTimeout(() => {
+                steps[2].classList.add('active');
+                statusIndicators[2].classList.add('processing');
+            }, 200);
+            currentStep = 2;
+        } else if (progress > 70 && currentStep === 2) {
+            // Complete step 3
+            steps[2].classList.remove('active');
+            steps[2].classList.add('completed');
+            statusIndicators[2].classList.remove('processing');
+            statusIndicators[2].classList.add('completed');
+            
+            // Start step 4
+            setTimeout(() => {
+                steps[3].classList.add('active');
+                statusIndicators[3].classList.add('processing');
+            }, 200);
+            currentStep = 3;
+        } else if (progress >= 100 && currentStep === 3) {
+            // Complete final step
+            steps[3].classList.remove('active');
+            steps[3].classList.add('completed');
+            statusIndicators[3].classList.remove('processing');
+            statusIndicators[3].classList.add('completed');
+            
+            // Add completion effect
+            setTimeout(() => {
+                progressFill.style.animation = 'holographicGlow 1s ease-in-out infinite';
+            }, 500);
+            
+            clearInterval(interval);
+        }
+    }, 400);
+    
+    // Add glitch effect to text
+    const loadingText = document.querySelector('.holographic-text');
+    if (loadingText) {
+        loadingText.classList.add('glitch-text');
+        loadingText.setAttribute('data-text', loadingText.textContent);
+    }
+    
+    // Add particle effects
+    addParticleEffects();
+}
+
+// Add dynamic particle effects
+function addParticleEffects() {
+    const analysisSection = document.querySelector('.analysis-section');
+    
+    // Create additional particles
+    for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 2 + 's';
+            analysisSection.appendChild(particle);
+            
+            // Remove particle after animation
+            setTimeout(() => {
+                if (particle.parentNode) {
+                    particle.parentNode.removeChild(particle);
+                }
+            }, 6000);
+        }, i * 1000);
+    }
 }
 
 // Display analysis results
@@ -161,6 +390,9 @@ function displayResults(data) {
     
     // Update grade display
     updateGradeDisplay(data.grading);
+    
+    // Update card images display
+    updateCardImagesDisplay();
     
     // Update metrics
     updateMetrics(data.grading);
@@ -200,47 +432,75 @@ function updateGradeDisplay(grading) {
     const gradeTitle = document.getElementById('gradeTitle');
     const gradeDescription = document.getElementById('gradeDescription');
     
-    // Extract numeric grade from overall grade
-    const gradeMatch = grading.overallGrade.match(/(\d+(?:\.\d+)?)/);
-    const numericGrade = gradeMatch ? gradeMatch[1] : '--';
+    gradeNumber.textContent = grading.overallGrade;
+    gradeLabel.textContent = 'Grade';
+    gradeTitle.textContent = grading.overallGrade;
+    gradeDescription.textContent = `Estimated grade with ${Math.round(grading.confidence * 100)}% confidence`;
     
-    gradeNumber.textContent = numericGrade;
-    gradeLabel.textContent = grading.overallGrade;
-    gradeTitle.textContent = `Estimated Grade: ${grading.overallGrade}`;
-    gradeDescription.textContent = `Overall Score: ${grading.overallScore}/10`;
-    
-    // Update grade circle color based on grade
-    const gradeCircle = document.getElementById('gradeCircle');
+    // Update grade circle color
+    const gradeCircle = document.querySelector('.grade-circle');
     gradeCircle.style.background = getGradeColor(grading.overallGrade);
 }
 
-// Update metrics display
-function updateMetrics(grading) {
-    // Centering
-    document.getElementById('centeringScore').textContent = grading.breakdown.centering.score.toFixed(1);
-    document.getElementById('centeringGrade').textContent = grading.breakdown.centering.grade;
+// Update card images display
+function updateCardImagesDisplay() {
+    const frontCardDisplay = document.getElementById('frontCardDisplay');
+    const backCardDisplay = document.getElementById('backCardDisplay');
     
-    // Corners
-    document.getElementById('cornersScore').textContent = grading.breakdown.corners.score.toFixed(1);
-    document.getElementById('cornersGrade').textContent = grading.breakdown.corners.grade;
+    // Update front image
+    if (frontImage) {
+        const frontPlaceholder = frontCardDisplay.querySelector('.card-image-placeholder');
+        frontPlaceholder.innerHTML = `<img src="${URL.createObjectURL(frontImage)}" alt="Front card" class="card-image">`;
+    }
     
-    // Edges
-    document.getElementById('edgesScore').textContent = grading.breakdown.edges.score.toFixed(1);
-    document.getElementById('edgesGrade').textContent = grading.breakdown.edges.grade;
-    
-    // Surface
-    document.getElementById('surfaceScore').textContent = grading.breakdown.surface.score.toFixed(1);
-    document.getElementById('surfaceGrade').textContent = grading.breakdown.surface.grade;
+    // Update back image
+    if (backImage) {
+        const backPlaceholder = backCardDisplay.querySelector('.card-image-placeholder');
+        backPlaceholder.innerHTML = `<img src="${URL.createObjectURL(backImage)}" alt="Back card" class="card-image">`;
+    }
 }
 
-// Update probability display
-function updateProbability(grading) {
-    const probabilityFill = document.getElementById('probabilityFill');
-    const probabilityText = document.getElementById('probabilityText');
+// Update metrics
+function updateMetrics(grading) {
+    const metricsGrid = document.getElementById('metricsGrid');
+    metricsGrid.innerHTML = '';
     
+    const metrics = [
+        { name: 'Centering', score: grading.breakdown.centering.score, grade: grading.breakdown.centering.grade, icon: 'fas fa-crosshairs' },
+        { name: 'Corners', score: grading.breakdown.corners.score, grade: grading.breakdown.corners.grade, icon: 'fas fa-square' },
+        { name: 'Edges', score: grading.breakdown.edges.score, grade: grading.breakdown.edges.grade, icon: 'fas fa-border-all' },
+        { name: 'Surface', score: grading.breakdown.surface.score, grade: grading.breakdown.surface.grade, icon: 'fas fa-eye' }
+    ];
+    
+    metrics.forEach(metric => {
+        const metricCard = document.createElement('div');
+        metricCard.className = 'metric-card';
+        metricCard.innerHTML = `
+            <div class="metric-header">
+                <i class="${metric.icon}"></i>
+                <h4>${metric.name}</h4>
+            </div>
+            <div class="metric-score">${metric.score}/10</div>
+            <div class="metric-grade">${metric.grade}</div>
+        `;
+        metricsGrid.appendChild(metricCard);
+    });
+}
+
+// Update probability
+function updateProbability(grading) {
+    const probabilityChart = document.getElementById('probabilityChart');
     const probability = Math.round(grading.probability * 100);
-    probabilityFill.style.width = `${probability}%`;
-    probabilityText.textContent = `${probability}%`;
+    
+    probabilityChart.innerHTML = `
+        <div class="probability-bar">
+            <div class="probability-fill" style="width: ${probability}%"></div>
+            <span class="probability-text">${probability}%</span>
+        </div>
+        <p style="text-align: center; margin-top: 10px; color: #666;">
+            Probability of achieving ${grading.overallGrade} grade
+        </p>
+    `;
 }
 
 // Update recommendations
@@ -248,29 +508,28 @@ function updateRecommendations(grading) {
     const recommendationsList = document.getElementById('recommendationsList');
     recommendationsList.innerHTML = '';
     
-    if (grading.recommendations && grading.recommendations.length > 0) {
-        grading.recommendations.forEach(rec => {
-            const recElement = document.createElement('div');
-            recElement.className = 'recommendation-item';
-            recElement.innerHTML = `
-                <div class="recommendation-category">${rec.category}</div>
-                <div class="recommendation-issue">${rec.issue}</div>
-                <div class="recommendation-suggestion">${rec.suggestion}</div>
-            `;
-            recommendationsList.appendChild(recElement);
-        });
-    } else {
-        recommendationsList.innerHTML = '<p>No specific recommendations at this time.</p>';
-    }
+    grading.recommendations.forEach(rec => {
+        const recItem = document.createElement('div');
+        recItem.className = 'recommendation-item';
+        recItem.innerHTML = `
+            <div class="recommendation-category">${rec.category}</div>
+            <div class="recommendation-issue">${rec.issue}</div>
+            <div class="recommendation-suggestion">${rec.suggestion}</div>
+        `;
+        recommendationsList.appendChild(recItem);
+    });
 }
 
 // Update market value
 function updateMarketValue(grading) {
-    const marketValue = document.getElementById('marketValue');
-    marketValue.textContent = `$${grading.marketValue.toLocaleString()}`;
+    const marketValueSection = document.getElementById('marketValueSection');
+    marketValueSection.innerHTML = `
+        <div class="market-value">$${grading.marketValue.toLocaleString()}</div>
+        <p class="market-note">*Estimated value based on condition and rarity</p>
+    `;
 }
 
-// Update defect detection results
+// Update defect detection
 function updateDefectDetection(defects) {
     const defectSection = document.getElementById('defectSection');
     if (!defectSection) return;
@@ -278,145 +537,113 @@ function updateDefectDetection(defects) {
     defectSection.innerHTML = '';
     
     // Overall defect score
-    const overallScore = document.createElement('div');
-    overallScore.className = 'defect-overall';
-    overallScore.innerHTML = `
-        <h3>Defect Analysis</h3>
-        <div class="defect-score">
-            <span class="score-label">Overall Defect Score:</span>
-            <span class="score-value ${defects.overall.score > 0.5 ? 'high' : defects.overall.score > 0.2 ? 'medium' : 'low'}">
-                ${(defects.overall.score * 100).toFixed(1)}%
-            </span>
+    const overallDiv = document.createElement('div');
+    overallDiv.className = 'defect-overview';
+    overallDiv.innerHTML = `
+        <div class="defect-stat">
+            <div class="defect-stat-label">Overall Score</div>
+            <div class="defect-stat-value">${defects.overall.score}/10</div>
+        </div>
+        <div class="defect-stat">
+            <div class="defect-stat-label">Confidence</div>
+            <div class="defect-stat-value">${Math.round(defects.overall.confidence * 100)}%</div>
         </div>
     `;
-    defectSection.appendChild(overallScore);
+    defectSection.appendChild(overallDiv);
     
-    // Individual defects
+    // Defect details
     if (defects.details && defects.details.length > 0) {
-        const defectsList = document.createElement('div');
-        defectsList.className = 'defects-list';
+        const detailsDiv = document.createElement('div');
+        detailsDiv.className = 'defect-details';
+        detailsDiv.innerHTML = '<h4>Detected Defects:</h4>';
         
         defects.details.forEach(defect => {
-            if (defect.severity > 0.1) { // Only show significant defects
-                const defectItem = document.createElement('div');
-                defectItem.className = 'defect-item';
-                defectItem.innerHTML = `
-                    <div class="defect-header">
-                        <span class="defect-type">${defect.type.replace(/_/g, ' ').toUpperCase()}</span>
-                        <span class="defect-severity ${defect.severity > 0.7 ? 'high' : defect.severity > 0.4 ? 'medium' : 'low'}">
-                            ${(defect.severity * 100).toFixed(1)}%
-                        </span>
-                    </div>
-                    <div class="defect-description">${defect.description}</div>
-                    <div class="defect-impact">Impact: ${defect.impact}</div>
-                `;
-                defectsList.appendChild(defectItem);
-            }
-        });
-        
-        defectSection.appendChild(defectsList);
-    }
-    
-    // Recommendations
-    if (defects.recommendations && defects.recommendations.length > 0) {
-        const recommendationsDiv = document.createElement('div');
-        recommendationsDiv.className = 'defect-recommendations';
-        recommendationsDiv.innerHTML = '<h4>Defect Recommendations:</h4>';
-        
-        defects.recommendations.forEach(rec => {
-            const recItem = document.createElement('div');
-            recItem.className = `recommendation-item ${rec.priority.toLowerCase()}`;
-            recItem.innerHTML = `
-                <div class="rec-priority">${rec.priority}</div>
-                <div class="rec-type">${rec.type.replace(/_/g, ' ')}</div>
-                <div class="rec-text">${rec.recommendation}</div>
+            const defectItem = document.createElement('div');
+            defectItem.className = 'defect-item';
+            defectItem.innerHTML = `
+                <div class="defect-header">
+                    <span class="defect-type">${defect.type}</span>
+                    <span class="defect-severity ${defect.severity > 0.7 ? 'high' : defect.severity > 0.4 ? 'medium' : 'low'}">
+                        ${(defect.severity * 100).toFixed(1)}%
+                    </span>
+                </div>
+                <div class="defect-description">${defect.description}</div>
+                <div class="defect-location">Location: ${defect.location}</div>
             `;
-            recommendationsDiv.appendChild(recItem);
+            detailsDiv.appendChild(defectItem);
         });
         
-        defectSection.appendChild(recommendationsDiv);
+        defectSection.appendChild(detailsDiv);
     }
 }
 
-// Update computational photography analysis
+// Update computational photography
 function updateComputationalPhotography(enhanced) {
     const photoSection = document.getElementById('photoSection');
     if (!photoSection) return;
     
     photoSection.innerHTML = '';
     
-    // Image quality metrics
-    const qualityMetrics = document.createElement('div');
-    qualityMetrics.className = 'photo-quality';
-    qualityMetrics.innerHTML = `
-        <h3>Computational Photography Analysis</h3>
-        <div class="quality-metrics">
-            <div class="metric">
-                <span class="metric-label">Sharpness:</span>
-                <span class="metric-value">${enhanced.analysis?.focus?.quality || 'Unknown'}</span>
+    // Quality metrics
+    if (enhanced.metadata && enhanced.metadata.qualityMetrics) {
+        const qualityDiv = document.createElement('div');
+        qualityDiv.className = 'quality-metrics';
+        qualityDiv.innerHTML = `
+            <div class="quality-metric">
+                <div class="quality-metric-label">Focus Score</div>
+                <div class="quality-metric-value">${enhanced.metadata.qualityMetrics.focus?.toFixed(2) || 'N/A'}</div>
             </div>
-            <div class="metric">
-                <span class="metric-label">Lighting:</span>
-                <span class="metric-value">${enhanced.analysis?.lighting?.exposure || 'Unknown'}</span>
+            <div class="quality-metric">
+                <div class="quality-metric-label">Lighting Score</div>
+                <div class="quality-metric-value">${enhanced.metadata.qualityMetrics.lighting?.toFixed(2) || 'N/A'}</div>
             </div>
-            <div class="metric">
-                <span class="metric-label">Composition:</span>
-                <span class="metric-value">${enhanced.analysis?.composition?.balance?.quality || 'Unknown'}</span>
+            <div class="quality-metric">
+                <div class="quality-metric-label">Composition Score</div>
+                <div class="quality-metric-value">${enhanced.metadata.qualityMetrics.composition?.toFixed(2) || 'N/A'}</div>
             </div>
-            <div class="metric">
-                <span class="metric-label">Image Quality:</span>
-                <span class="metric-value">${enhanced.metadata?.qualityMetrics?.qualityScore ? 
-                    (enhanced.metadata.qualityMetrics.qualityScore * 100).toFixed(1) + '%' : 'Unknown'}</span>
-            </div>
-        </div>
-    `;
-    photoSection.appendChild(qualityMetrics);
+        `;
+        photoSection.appendChild(qualityDiv);
+    }
     
-    // Artifact detection
-    if (enhanced.analysis?.artifacts) {
-        const artifactsDiv = document.createElement('div');
-        artifactsDiv.className = 'artifacts-detection';
-        artifactsDiv.innerHTML = '<h4>Image Artifacts:</h4>';
+    // Artifact analysis
+    if (enhanced.analysis && enhanced.analysis.artifacts) {
+        const artifactDiv = document.createElement('div');
+        artifactDiv.className = 'artifact-analysis';
+        artifactDiv.innerHTML = '<h4>Artifact Detection:</h4>';
         
-        const artifacts = enhanced.analysis.artifacts;
-        const artifactTypes = ['compression', 'noise', 'blur', 'jpeg'];
-        
-        artifactTypes.forEach(type => {
-            if (artifacts[type]) {
-                const artifactItem = document.createElement('div');
-                artifactItem.className = 'artifact-item';
-                artifactItem.innerHTML = `
-                    <span class="artifact-type">${type.charAt(0).toUpperCase() + type.slice(1)}:</span>
-                    <span class="artifact-severity ${artifacts[type].severity?.toLowerCase() || 'unknown'}">
-                        ${artifacts[type].severity || 'Unknown'}
-                    </span>
-                `;
-                artifactsDiv.appendChild(artifactItem);
-            }
+        Object.entries(enhanced.analysis.artifacts).forEach(([artifact, level]) => {
+            const artifactItem = document.createElement('div');
+            artifactItem.className = 'artifact-item';
+            artifactItem.innerHTML = `
+                <div class="artifact-header">
+                    <span class="artifact-type">${artifact}</span>
+                    <span class="artifact-level ${level}">${level}</span>
+                </div>
+                <div class="artifact-description">Detected ${level} level ${artifact}</div>
+            `;
+            artifactDiv.appendChild(artifactItem);
         });
         
-        photoSection.appendChild(artifactsDiv);
+        photoSection.appendChild(artifactDiv);
     }
     
     // Texture analysis
-    if (enhanced.metadata?.textureStats) {
+    if (enhanced.metadata && enhanced.metadata.textureStats) {
         const textureDiv = document.createElement('div');
         textureDiv.className = 'texture-analysis';
-        textureDiv.innerHTML = `
-            <h4>Texture Analysis:</h4>
-            <div class="texture-metrics">
-                <div class="texture-metric">
-                    <span>Variance:</span>
-                    <span>${enhanced.metadata.textureStats.textureVariance?.toFixed(3) || 'N/A'}</span>
-                </div>
-                <div class="texture-metric">
-                    <span>Edge Density:</span>
-                    <span>${enhanced.metadata.textureStats.edgeDensity?.toFixed(3) || 'N/A'}</span>
-                </div>
-                <div class="texture-metric">
-                    <span>Smoothness:</span>
-                    <span>${enhanced.metadata.textureStats.smoothness?.toFixed(3) || 'N/A'}</span>
-                </div>
+        textureDiv.innerHTML = '<h4>Texture Analysis:</h4>';
+        textureDiv.innerHTML += `
+            <div class="texture-metric">
+                <span>Variance:</span>
+                <span>${enhanced.metadata.textureStats.variance?.toFixed(3) || 'N/A'}</span>
+            </div>
+            <div class="texture-metric">
+                <span>Edge Density:</span>
+                <span>${enhanced.metadata.textureStats.edgeDensity?.toFixed(3) || 'N/A'}</span>
+            </div>
+            <div class="texture-metric">
+                <span>Smoothness:</span>
+                <span>${enhanced.metadata.textureStats.smoothness?.toFixed(3) || 'N/A'}</span>
             </div>
         `;
         photoSection.appendChild(textureDiv);
@@ -670,27 +897,15 @@ Professional grading by PSA is recommended for accurate assessment.
 
 // Reset upload area
 function resetUploadArea() {
-    uploadArea.innerHTML = `
-        <div class="upload-icon">
-            <i class="fas fa-cloud-upload-alt"></i>
-        </div>
-        <h3>Upload Your Pokémon Card</h3>
-        <p>Drag and drop your card image here or click to browse</p>
-        <p class="upload-hint">Supports JPG, PNG, WEBP (Max 10MB)</p>
-        <input type="file" id="fileInput" accept="image/*" hidden>
-        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-            Choose File
-        </button>
-    `;
-    
-    // Re-initialize event listeners
-    initializeUploadArea();
-    initializeFileInput();
+    resetUploads();
+    uploadSection.style.display = 'block';
+    analysisSection.style.display = 'none';
+    resultsSection.style.display = 'none';
+    resultsSection.classList.remove('fade-in');
 }
 
 // Show error message
 function showError(message) {
-    // Create error notification
     const notification = document.createElement('div');
     notification.className = 'error-notification';
     notification.style.cssText = `
@@ -706,10 +921,7 @@ function showError(message) {
         animation: slideIn 0.3s ease-out;
     `;
     notification.textContent = message;
-    
     document.body.appendChild(notification);
-    
-    // Remove notification after 5 seconds
     setTimeout(() => {
         notification.style.animation = 'slideOut 0.3s ease-out';
         setTimeout(() => {
@@ -722,7 +934,6 @@ function showError(message) {
 
 // Show success message
 function showSuccess(message) {
-    // Create success notification
     const notification = document.createElement('div');
     notification.className = 'success-notification';
     notification.style.cssText = `
@@ -738,10 +949,7 @@ function showSuccess(message) {
         animation: slideIn 0.3s ease-out;
     `;
     notification.textContent = message;
-    
     document.body.appendChild(notification);
-    
-    // Remove notification after 5 seconds
     setTimeout(() => {
         notification.style.animation = 'slideOut 0.3s ease-out';
         setTimeout(() => {
