@@ -26,18 +26,32 @@
             <!-- Upload Section -->
             <section class="upload-section" id="uploadSection">
                 <div class="upload-container">
-                    <div class="upload-area" id="uploadArea">
-                        <div class="upload-icon">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                        </div>
-                        <h3>Upload Your Pokémon Card</h3>
-                        <p>Drag and drop your card image here or click to browse</p>
-                        <p class="upload-hint">Supports JPG, PNG, WEBP (Max 10MB)</p>
-                        <input type="file" id="fileInput" accept="image/*" hidden>
-                        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-                            Choose File
-                        </button>
-                    </div>
+                            <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <h3>Upload Your Pokémon Card</h3>
+            <p>For best analysis results, please upload both front and back images</p>
+            <p class="upload-hint">Supports JPG, PNG, WEBP (Max 10MB each)</p>
+            <div class="upload-instructions">
+                <div class="instruction-step">
+                    <span class="step-number">1</span>
+                    <span>Upload front image (required)</span>
+                </div>
+                <div class="instruction-step">
+                    <span class="step-number">2</span>
+                    <span>Upload back image (recommended)</span>
+                </div>
+                <div class="instruction-step">
+                    <span class="step-number">3</span>
+                    <span>Get comprehensive analysis</span>
+                </div>
+            </div>
+            <input type="file" id="fileInput" accept="image/*" multiple hidden>
+            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                Choose Files
+            </button>
+        </div>
                 </div>
             </section>
 
@@ -122,6 +136,27 @@
                         <h3><i class="fas fa-lightbulb"></i> Recommendations</h3>
                         <div class="recommendations-list" id="recommendationsList">
                             <!-- Recommendations will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="defect-section">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Defect Detection</h3>
+                        <div class="defect-content" id="defectSection">
+                            <!-- Defect detection results will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="photo-section">
+                        <h3><i class="fas fa-camera"></i> Computational Photography</h3>
+                        <div class="photo-content" id="photoSection">
+                            <!-- Computational photography analysis will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="segmentation-section">
+                        <h3><i class="fas fa-crop-alt"></i> Image Segmentation</h3>
+                        <div class="segmentation-content" id="segmentationSection">
+                            <!-- Image segmentation and highlights will be populated here -->
                         </div>
                     </div>
 

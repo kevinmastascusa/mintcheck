@@ -5,10 +5,12 @@ A professional-grade card analysis tool that estimates PSA grades for Pokémon t
 ## 🚀 Features
 
 - **Advanced Card Analysis**: Analyzes centering, corners, edges, and surface condition
+- **State-of-the-Art Defect Detection**: Multi-scale computational photography pipeline
 - **PSA Grade Estimation**: Provides accurate grade estimates based on PSA guidelines
 - **Probability Scoring**: Calculates the probability of achieving specific grades
 - **Market Value Estimation**: Estimates card value based on condition and rarity
 - **Professional Recommendations**: Offers specific advice for card improvement
+- **Computational Photography**: Advanced image enhancement and quality analysis
 - **Beautiful UI**: Modern, responsive interface with drag-and-drop functionality
 - **Report Generation**: Download detailed analysis reports
 
@@ -67,6 +69,8 @@ A professional-grade card analysis tool that estimates PSA grades for Pokémon t
 - **Component Breakdown**: Detailed scores for each grading criterion
 - **Market Value**: Estimated value based on condition and rarity
 - **Submission Advice**: Professional guidance on whether to submit for grading
+- **Defect Detection**: Advanced computational photography pipeline for flaw identification
+- **Image Quality Analysis**: Comprehensive analysis of image artifacts and quality metrics
 
 ## 🔍 Analysis Criteria
 
@@ -101,6 +105,42 @@ A professional-grade card analysis tool that estimates PSA grades for Pokémon t
 | Excellent-Mint | 6.0-6.9 | Good condition with noticeable wear |
 | Excellent | 5.0-5.9 | Above average condition |
 | Very Good-Excellent | 4.0-4.9 | Average condition |
+
+## 🔬 Defect Detection & Computational Photography
+
+### Advanced Defect Detection Pipeline
+
+The system employs state-of-the-art computational photography techniques to identify and analyze card defects:
+
+#### **Defect Types Detected**
+- **Scratches**: Linear surface damage detection using edge analysis
+- **Dents**: Surface depressions identified through morphological analysis
+- **Corner Wear**: Corner damage assessment with regional analysis
+- **Edge Wear**: Edge condition evaluation across all card edges
+- **Surface Damage**: Texture irregularities and surface defects
+- **Discoloration**: Color inconsistencies and fading detection
+- **Printing Defects**: Print quality and consistency analysis
+- **Water Damage**: Water damage patterns and staining detection
+
+#### **Computational Photography Techniques**
+- **HDR Processing**: High dynamic range enhancement for better defect visibility
+- **Sharpness Enhancement**: Unsharp masking and edge enhancement
+- **Noise Reduction**: Bilateral filtering for artifact removal
+- **Contrast Enhancement**: CLAHE (Contrast Limited Adaptive Histogram Equalization)
+- **Color Correction**: White balance and color accuracy improvement
+- **Texture Analysis**: Advanced texture variance and edge density analysis
+
+#### **Quality Metrics**
+- **Focus Analysis**: Edge density and sharpness assessment
+- **Lighting Analysis**: Exposure and uniformity evaluation
+- **Composition Analysis**: Rule of thirds and balance assessment
+- **Artifact Detection**: Compression, noise, blur, and JPEG artifact identification
+
+#### **Visualization Features**
+- **Defect Highlighting**: Color-coded defect regions on card images
+- **Severity Indicators**: Visual severity levels for each defect type
+- **Impact Assessment**: Defect impact on overall grade estimation
+- **Recommendation Engine**: Professional advice for defect mitigation
 | Very Good | 3.0-3.9 | Below average condition |
 | Good-Very Good | 2.0-2.9 | Poor condition |
 | Good | 1.0-1.9 | Very poor condition |

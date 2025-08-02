@@ -1,6 +1,7 @@
 // Global variables
 let currentAnalysis = null;
 let currentGrading = null;
+let currentCardImage = null;
 
 // DOM elements
 const uploadArea = document.getElementById('uploadArea');
@@ -52,9 +53,13 @@ function handleDrop(e) {
 }
 
 function handleFileSelect(e) {
-    const file = e.target.files[0];
-    if (file) {
-        handleFile(file);
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
+        if (files.length === 1) {
+            handleFile(files[0]);
+        } else {
+            handleMultipleFiles(files);
+        }
     }
 }
 
@@ -77,6 +82,22 @@ function handleFile(file) {
     startAnalysis(file);
 }
 
+// Handle multiple files
+function handleMultipleFiles(files) {
+    if (files.length === 0) return;
+    
+    // For now, analyze the first file (front image)
+    const frontImage = files[0];
+    handleFile(frontImage);
+    
+    if (files.length > 1) {
+        // Show message about back image being available
+        setTimeout(() => {
+            showSuccess('Front image uploaded! Back image analysis will be added in future updates.');
+        }, 1000);
+    }
+}
+
 // Show file preview
 function showFilePreview(file) {
     const reader = new FileReader();
@@ -87,6 +108,7 @@ function showFilePreview(file) {
                 <p>${file.name}</p>
             </div>
         `;
+        currentCardImage = e.target.result; // Store the current card image
     };
     reader.readAsDataURL(file);
 }
@@ -151,6 +173,21 @@ function displayResults(data) {
     
     // Update market value
     updateMarketValue(data.grading);
+    
+    // Update defect detection results
+    if (data.defects) {
+        updateDefectDetection(data.defects);
+    }
+    
+    // Update computational photography analysis
+    if (data.enhanced) {
+        updateComputationalPhotography(data.enhanced);
+    }
+    
+    // Update image segmentation and highlights
+    if (data.segmentation) {
+        updateImageSegmentation(data.segmentation);
+    }
     
     // Add fade-in animation
     resultsSection.classList.add('fade-in');
@@ -231,6 +268,320 @@ function updateRecommendations(grading) {
 function updateMarketValue(grading) {
     const marketValue = document.getElementById('marketValue');
     marketValue.textContent = `$${grading.marketValue.toLocaleString()}`;
+}
+
+// Update defect detection results
+function updateDefectDetection(defects) {
+    const defectSection = document.getElementById('defectSection');
+    if (!defectSection) return;
+    
+    defectSection.innerHTML = '';
+    
+    // Overall defect score
+    const overallScore = document.createElement('div');
+    overallScore.className = 'defect-overall';
+    overallScore.innerHTML = `
+        <h3>Defect Analysis</h3>
+        <div class="defect-score">
+            <span class="score-label">Overall Defect Score:</span>
+            <span class="score-value ${defects.overall.score > 0.5 ? 'high' : defects.overall.score > 0.2 ? 'medium' : 'low'}">
+                ${(defects.overall.score * 100).toFixed(1)}%
+            </span>
+        </div>
+    `;
+    defectSection.appendChild(overallScore);
+    
+    // Individual defects
+    if (defects.details && defects.details.length > 0) {
+        const defectsList = document.createElement('div');
+        defectsList.className = 'defects-list';
+        
+        defects.details.forEach(defect => {
+            if (defect.severity > 0.1) { // Only show significant defects
+                const defectItem = document.createElement('div');
+                defectItem.className = 'defect-item';
+                defectItem.innerHTML = `
+                    <div class="defect-header">
+                        <span class="defect-type">${defect.type.replace(/_/g, ' ').toUpperCase()}</span>
+                        <span class="defect-severity ${defect.severity > 0.7 ? 'high' : defect.severity > 0.4 ? 'medium' : 'low'}">
+                            ${(defect.severity * 100).toFixed(1)}%
+                        </span>
+                    </div>
+                    <div class="defect-description">${defect.description}</div>
+                    <div class="defect-impact">Impact: ${defect.impact}</div>
+                `;
+                defectsList.appendChild(defectItem);
+            }
+        });
+        
+        defectSection.appendChild(defectsList);
+    }
+    
+    // Recommendations
+    if (defects.recommendations && defects.recommendations.length > 0) {
+        const recommendationsDiv = document.createElement('div');
+        recommendationsDiv.className = 'defect-recommendations';
+        recommendationsDiv.innerHTML = '<h4>Defect Recommendations:</h4>';
+        
+        defects.recommendations.forEach(rec => {
+            const recItem = document.createElement('div');
+            recItem.className = `recommendation-item ${rec.priority.toLowerCase()}`;
+            recItem.innerHTML = `
+                <div class="rec-priority">${rec.priority}</div>
+                <div class="rec-type">${rec.type.replace(/_/g, ' ')}</div>
+                <div class="rec-text">${rec.recommendation}</div>
+            `;
+            recommendationsDiv.appendChild(recItem);
+        });
+        
+        defectSection.appendChild(recommendationsDiv);
+    }
+}
+
+// Update computational photography analysis
+function updateComputationalPhotography(enhanced) {
+    const photoSection = document.getElementById('photoSection');
+    if (!photoSection) return;
+    
+    photoSection.innerHTML = '';
+    
+    // Image quality metrics
+    const qualityMetrics = document.createElement('div');
+    qualityMetrics.className = 'photo-quality';
+    qualityMetrics.innerHTML = `
+        <h3>Computational Photography Analysis</h3>
+        <div class="quality-metrics">
+            <div class="metric">
+                <span class="metric-label">Sharpness:</span>
+                <span class="metric-value">${enhanced.analysis?.focus?.quality || 'Unknown'}</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">Lighting:</span>
+                <span class="metric-value">${enhanced.analysis?.lighting?.exposure || 'Unknown'}</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">Composition:</span>
+                <span class="metric-value">${enhanced.analysis?.composition?.balance?.quality || 'Unknown'}</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">Image Quality:</span>
+                <span class="metric-value">${enhanced.metadata?.qualityMetrics?.qualityScore ? 
+                    (enhanced.metadata.qualityMetrics.qualityScore * 100).toFixed(1) + '%' : 'Unknown'}</span>
+            </div>
+        </div>
+    `;
+    photoSection.appendChild(qualityMetrics);
+    
+    // Artifact detection
+    if (enhanced.analysis?.artifacts) {
+        const artifactsDiv = document.createElement('div');
+        artifactsDiv.className = 'artifacts-detection';
+        artifactsDiv.innerHTML = '<h4>Image Artifacts:</h4>';
+        
+        const artifacts = enhanced.analysis.artifacts;
+        const artifactTypes = ['compression', 'noise', 'blur', 'jpeg'];
+        
+        artifactTypes.forEach(type => {
+            if (artifacts[type]) {
+                const artifactItem = document.createElement('div');
+                artifactItem.className = 'artifact-item';
+                artifactItem.innerHTML = `
+                    <span class="artifact-type">${type.charAt(0).toUpperCase() + type.slice(1)}:</span>
+                    <span class="artifact-severity ${artifacts[type].severity?.toLowerCase() || 'unknown'}">
+                        ${artifacts[type].severity || 'Unknown'}
+                    </span>
+                `;
+                artifactsDiv.appendChild(artifactItem);
+            }
+        });
+        
+        photoSection.appendChild(artifactsDiv);
+    }
+    
+    // Texture analysis
+    if (enhanced.metadata?.textureStats) {
+        const textureDiv = document.createElement('div');
+        textureDiv.className = 'texture-analysis';
+        textureDiv.innerHTML = `
+            <h4>Texture Analysis:</h4>
+            <div class="texture-metrics">
+                <div class="texture-metric">
+                    <span>Variance:</span>
+                    <span>${enhanced.metadata.textureStats.textureVariance?.toFixed(3) || 'N/A'}</span>
+                </div>
+                <div class="texture-metric">
+                    <span>Edge Density:</span>
+                    <span>${enhanced.metadata.textureStats.edgeDensity?.toFixed(3) || 'N/A'}</span>
+                </div>
+                <div class="texture-metric">
+                    <span>Smoothness:</span>
+                    <span>${enhanced.metadata.textureStats.smoothness?.toFixed(3) || 'N/A'}</span>
+                </div>
+            </div>
+        `;
+        photoSection.appendChild(textureDiv);
+    }
+}
+
+// Update image segmentation and highlights
+function updateImageSegmentation(segmentation) {
+    const segmentationSection = document.getElementById('segmentationSection');
+    if (!segmentationSection) return;
+    
+    segmentationSection.innerHTML = '';
+    
+    // Create segmentation overview
+    const overview = document.createElement('div');
+    overview.className = 'segmentation-overview';
+    overview.innerHTML = `
+        <h3>Image Segmentation Analysis</h3>
+        <div class="segmentation-stats">
+            <div class="stat">
+                <span class="stat-label">Image Size:</span>
+                <span class="stat-value">${segmentation.dimensions.width} × ${segmentation.dimensions.height}</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Critical Areas:</span>
+                <span class="stat-value">${segmentation.criticalAreas.length}</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Segments Analyzed:</span>
+                <span class="stat-value">${segmentation.metadata.totalSegments}</span>
+            </div>
+        </div>
+        <div class="original-image-container">
+            <h4>Original Card Image:</h4>
+            <img src="${currentCardImage}" alt="Original card" class="original-card-image">
+        </div>
+    `;
+    segmentationSection.appendChild(overview);
+    
+    // Display critical areas
+    if (segmentation.criticalAreas && segmentation.criticalAreas.length > 0) {
+        const criticalAreasDiv = document.createElement('div');
+        criticalAreasDiv.className = 'critical-areas';
+        criticalAreasDiv.innerHTML = '<h4>Critical Areas Detected:</h4>';
+        
+        segmentation.criticalAreas.forEach((area, index) => {
+            const areaItem = document.createElement('div');
+            areaItem.className = 'critical-area-item';
+            areaItem.innerHTML = `
+                <div class="area-header">
+                    <span class="area-type">${area.type.replace(/_/g, ' ').toUpperCase()}</span>
+                    <span class="area-location">${area.location}</span>
+                    <span class="area-severity ${area.severity > 0.7 ? 'high' : area.severity > 0.4 ? 'medium' : 'low'}">
+                        ${(area.severity * 100).toFixed(1)}%
+                    </span>
+                </div>
+                <div class="area-description">${area.description}</div>
+                <div class="area-coordinates">
+                    Position: (${area.segment.x}, ${area.segment.y}) 
+                    Size: ${area.segment.width} × ${area.segment.height}
+                </div>
+            `;
+            criticalAreasDiv.appendChild(areaItem);
+        });
+        
+        segmentationSection.appendChild(criticalAreasDiv);
+    }
+    
+    // Display segment highlights with images
+    const highlightsDiv = document.createElement('div');
+    highlightsDiv.className = 'segment-highlights';
+    highlightsDiv.innerHTML = '<h4>Segment Analysis with Visual Highlights:</h4>';
+    
+    // Corner highlights with images
+    if (segmentation.highlights.corners && segmentation.highlights.corners.length > 0) {
+        const cornersDiv = document.createElement('div');
+        cornersDiv.className = 'highlight-group';
+        cornersDiv.innerHTML = `
+            <div class="highlight-title">
+                <i class="fas fa-square"></i>
+                <span>Corner Analysis</span>
+            </div>
+            <div class="highlight-images">
+                ${segmentation.highlights.corners.map(corner => {
+                    const imageData = segmentation.highlightImages?.corners?.[corner];
+                    return imageData ? 
+                        `<div class="highlight-image-container">
+                            <img src="data:image/png;base64,${imageData}" alt="${corner} highlight" class="highlight-image">
+                            <div class="highlight-label">${corner.replace(/([A-Z])/g, ' $1').trim()}</div>
+                        </div>` : '';
+                }).join('')}
+            </div>
+        `;
+        highlightsDiv.appendChild(cornersDiv);
+    }
+    
+    // Edge highlights with images
+    if (segmentation.highlights.edges && segmentation.highlights.edges.length > 0) {
+        const edgesDiv = document.createElement('div');
+        edgesDiv.className = 'highlight-group';
+        edgesDiv.innerHTML = `
+            <div class="highlight-title">
+                <i class="fas fa-border-all"></i>
+                <span>Edge Analysis</span>
+            </div>
+            <div class="highlight-images">
+                ${segmentation.highlights.edges.map(edge => {
+                    const imageData = segmentation.highlightImages?.edges?.[edge];
+                    return imageData ? 
+                        `<div class="highlight-image-container">
+                            <img src="data:image/png;base64,${imageData}" alt="${edge} highlight" class="highlight-image">
+                            <div class="highlight-label">${edge.charAt(0).toUpperCase() + edge.slice(1)}</div>
+                        </div>` : '';
+                }).join('')}
+            </div>
+        `;
+        highlightsDiv.appendChild(edgesDiv);
+    }
+    
+    // Center highlight with image
+    if (segmentation.highlights.center) {
+        const centerDiv = document.createElement('div');
+        centerDiv.className = 'highlight-group';
+        const centerImageData = segmentation.highlightImages?.center;
+        centerDiv.innerHTML = `
+            <div class="highlight-title">
+                <i class="fas fa-crosshairs"></i>
+                <span>Center Analysis</span>
+            </div>
+            <div class="highlight-images">
+                ${centerImageData ? 
+                    `<div class="highlight-image-container">
+                        <img src="data:image/png;base64,${centerImageData}" alt="center highlight" class="highlight-image">
+                        <div class="highlight-label">Main Image Area</div>
+                    </div>` : '<span class="highlight-item center">Main Image Area</span>'
+                }
+            </div>
+        `;
+        highlightsDiv.appendChild(centerDiv);
+    }
+    
+    // Surface highlights with images
+    if (segmentation.highlights.surface && segmentation.highlights.surface.length > 0) {
+        const surfaceDiv = document.createElement('div');
+        surfaceDiv.className = 'highlight-group';
+        surfaceDiv.innerHTML = `
+            <div class="highlight-title">
+                <i class="fas fa-eye"></i>
+                <span>Surface Analysis</span>
+            </div>
+            <div class="highlight-images">
+                ${segmentation.highlights.surface.map(surface => {
+                    const imageData = segmentation.highlightImages?.surface?.[surface];
+                    return imageData ? 
+                        `<div class="highlight-image-container">
+                            <img src="data:image/png;base64,${imageData}" alt="${surface} highlight" class="highlight-image">
+                            <div class="highlight-label">${surface.replace(/_/g, ' ')}</div>
+                        </div>` : '';
+                }).join('')}
+            </div>
+        `;
+        highlightsDiv.appendChild(surfaceDiv);
+    }
+    
+    segmentationSection.appendChild(highlightsDiv);
 }
 
 // Get grade color
@@ -347,6 +698,38 @@ function showError(message) {
         top: 20px;
         right: 20px;
         background: #e53e3e;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        animation: slideIn 0.3s ease-out;
+    `;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Remove notification after 5 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 5000);
+}
+
+// Show success message
+function showSuccess(message) {
+    // Create success notification
+    const notification = document.createElement('div');
+    notification.className = 'success-notification';
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #38a169;
         color: white;
         padding: 15px 20px;
         border-radius: 10px;
